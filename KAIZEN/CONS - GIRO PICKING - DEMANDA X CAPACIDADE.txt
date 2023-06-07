@@ -1,0 +1,87 @@
+---AVALIA A CAPACIDADE DO PICKING VS DEMANDA DIÁRIA E SUGERE A CAPADIDADE PARA ATENDER 1 DIA DE EXPEDIÇÃO
+---AILTON SOBRAL
+select   em.codigoerp "Filial"  
+       , m.empresa_id "ID Filial"
+       , p.ativo "Ativo"
+       , m.produto_id "ID Prod"
+       , p.codigo "Cod Prod"
+       , p.descricao "Produto"
+       , p.qtunitcx "Fator conversão"
+       , p.qtde_gerencial "Estoque ERP"
+       , m.endereco_id "ID Endereço"
+       , e.deposito
+       , e.rua
+       , e.predio 
+       , e.nivel 
+       , e.apto
+       , e.tipo_picking 
+       , max(s.tipo_fator)fator_picking
+       , case when max(s.tipo_fator) = 'CX' then 
+            trunc(max(s.capacidade) /  p.qtunitcx) 
+          else max(s.capacidade) end "Capacidade Picking"
+       , case when max(s.tipo_fator) = 'CX' then 
+            trunc(max(coalesce (s.ponto_reposicao,0)) /  p.qtunitcx) 
+          else max(s.ponto_reposicao) end   "Ponto Reposição"
+       , tp.descricao "Tipo posição"  
+       , tp.cubagem "Cubagem Posição"
+       , max(to_char(m.data_finalizacao,'DD/MM/YYYY HH24:MM')) "Última saída"
+       , count(distinct m.numero_pedido) "Qt Pedidos"
+       , count(distinct m.data_geracao\:\:date) "Qt dias" 
+       , sum(m.qt) "Qt Unidades"
+       , ceiling (sum(m.qt) / p.qtunitcx) "Qt Caixas"
+       , ceiling((sum(m.qt) / p.qtunitcx) / count(distinct m.data_geracao\:\:date)) "Media Caixas Dia"
+       , ceiling(sum(m.qt)  / count(distinct m.data_geracao\:\:date)) "Media Und Dia" 
+       , max(coalesce(s.capacidade,1))/ coalesce(count(distinct m.data_geracao\:\:date),1)    "Cobertura do picking em dias"
+       , (select count(*) 
+           from movimentacao mv 
+           where mv.produto_id = m.produto_id 
+           and mv.endereco_id = m.endereco_id 
+           and  tipo in (62) 
+           and estornado= 'N'
+           and   date_trunc('day', mv.data_geracao) >= to_timestamp(''||:periodo_inicio, 'DD/MM/YYYY')
+           and   date_trunc('day', mv.data_geracao) <= to_timestamp(''||:periodo_fim, 'DD/MM/YYYY'))"Qtde abastec corretivo/transferência"
+     , (select count(*) from ruptura r 
+         where r.produto_id = m.produto_id 
+           and r.endereco_id = m.endereco_id
+           and  date_trunc('day', r.data ) >= to_timestamp(''||:periodo_inicio, 'DD/MM/YYYY')
+           and   date_trunc('day', r.data ) <= to_timestamp(''||:periodo_fim, 'DD/MM/YYYY')) "Qtde Rupturas"
+     , coalesce ((select sum(es.qt) + sum(es.qt_pendente_entrada) from estoque es, endereco en 
+         where es.endereco_id = en.id 
+         and   en.tipo_endereco = 'AE'
+         and   en.tipo_estoque not in ('A','F')
+         and   es.produto_id = m.produto_id
+         and   en.empresa_id = m.empresa_id),0)"Estoque aéreo"           
+from movimentacao m, endereco e, produto p, empresa em, estoque s, tipo_posicao tp    
+where m.endereco_id = e.id 
+and   e.tipo_posicao_id  = tp.id 
+and   s.endereco_id = e.id 
+and   m.endereco_id = s.endereco_id 
+and   m.produto_id = s.produto_id 
+and   m.empresa_id = em.id 
+and   m.produto_id = p.id 
+and   m.estornado  = 'N'
+and   m.tipo_operacao ='S'
+and   m.tipo not in (58,50)
+and   m.situacao = 'C'
+and   em.codigoerp = :filial
+and   date_trunc('day', m.data_geracao) >= to_timestamp(''||:periodo_inicio, 'DD/MM/YYYY')
+and   date_trunc('day', m.data_geracao) <= to_timestamp(''||:periodo_fim, 'DD/MM/YYYY')
+and   e.tipo_endereco ='AP'
+group by em.codigoerp  
+       , m.empresa_id 
+       , p.ativo
+       , p.codigo
+       , p.descricao 
+       , p.qtunitcx 
+       , p.qtde_gerencial
+       , m.produto_id 
+       , m.endereco_id 
+       , e.deposito
+       , e.rua
+       , e.predio 
+       , e.nivel 
+       , e.apto
+       , e.tipo_picking
+       , tp.descricao 
+       , tp.cubagem
+order by "Cobertura do picking em dias" 

@@ -1,0 +1,19 @@
+select DISTINCT PCMOV.CODPROD,
+                PCMOV.CODCLI, --7345 e 4563
+                PCPRODUT.DESCRICAO,
+                PCMOV.NUMNOTA,
+                PCMOV.NUMPED,
+                PCMOV.QT,
+                PCMOV.PUNIT,
+                (PCMOV.QT * PCMOV.VLIPI) VLIPI,
+                PCMOV.CODOPER,
+                PCMOV.DTMOV,
+                PCPEDC.DATA
+
+  from PCMOV, PCPRODUT, PCPEDC
+ where PCMOV.CODPROD = PCPRODUT.CODPROD
+   AND PCMOV.NUMPED = PCPEDC.NUMPED
+   AND PCMOV.CODOPER IN ('S','ST')
+   AND PCMOV.CODPROD IN (17301,17757,17758)
+   AND PCMOV.VLIPI = 0
+   AND PCPEDC.DATA BETWEEN '01-11-2020' AND '15-12-2020'

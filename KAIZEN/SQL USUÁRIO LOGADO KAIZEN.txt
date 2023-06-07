@@ -1,0 +1,2 @@
+select data_login, nome, usuario.* from usuario where data_login is not null and conectado = 'S'
+ORDER BY data_login

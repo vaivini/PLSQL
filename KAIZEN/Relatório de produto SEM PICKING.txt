@@ -1,0 +1,14 @@
+select ativo,
+codigo,
+descricao,
+usa_picking,
+qtde_gerencial,
+coalesce((select sum(qt) from estoque s, endereco e
+where s.endereco_id = e.id
+and e.tipo_endereco= 'AE'
+and s.produto_id = p.id ),0) "Estoque Pulmão"
+from produto p
+where id not in (select produto_id from estoque s, endereco e
+where s.endereco_id = e.id
+and e.tipo_endereco= 'AP')
+and ativo = 'S'

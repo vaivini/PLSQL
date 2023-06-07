@@ -1,0 +1,20 @@
+select
+m.codigo_conferente as codigo,
+u.nome as nome,
+count(distinct m.numeroom) as qt_oms,
+count(m.produto_id) as qt_sku,
+sum(m.qtconferida) as quantidade,
+'CONFERENCIA' as tipo
+from movimentacao m 
+inner join produto p on (m.produto_id = p.id)
+left join endereco ee on (m.endereco_id = ee.id)
+left join usuario u on (u.id = m.codigo_conferente)
+where m.estornado = 'N'
+and m.conferido = 'S'
+and m.tipo in(13,16)
+and m.codigo_separador <> m.codigo_conferente 
+and date_trunc('day',m.data_inicio_conferencia) >= to_date(''||:dataini, 'dd/mm/yyyy')
+and date_trunc('day',m.data_fim_conferencia) <= to_date(''||:datafim, 'dd/mm/yyyy')
+group by m.codigo_conferente,u.nome,tipo
+order by sum(m.qtconferida)  desc , count(m.produto_id) desc ,  count(distinct m.numeroom) desc
+

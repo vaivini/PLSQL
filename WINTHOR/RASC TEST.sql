@@ -1,0 +1,34 @@
+SELECT DISTINCT
+       I.CODPROD,
+       P.DESCRICAO,
+       --I.QT,
+       sum(I.qt) as t,
+       P.unidade,
+       P.CODMARCA,
+       M.MARCA,
+       PC.CODPRACA,
+       PRA.PRACA,
+       C.NUMCAR,
+       C.DESTINO
+  FROM PCMARCA M,PCPEDC PC, PCPEDI I, PCPRODUT P, PCCARREG C, PCPRACA PRA
+ WHERE P.CODPROD = I.CODPROD
+   AND C.NUMCAR = I.NUMCAR
+   AND M.CODMARCA = P.CODMARCA
+   AND C.NUMCAR = PC.NUMCAR
+   AND PC.NUMPED = I.NUMPED
+   AND PC.NUMCAR = I.NUMCAR
+   AND P.CODLINHAPROD = 1
+   AND PC.CODCLI = I.CODCLI
+   AND PC.CODPRACA = PRA.CODPRACA
+   AND I.NUMCAR = 3122
+ group by 
+          PC.CODPRACA,
+          PRA.PRACA,
+          P.DESCRICAO,
+          I.CODPROD,
+          P.unidade,
+          P.CODMARCA,
+          M.MARCA,
+          C.NUMCAR,
+          C.DESTINO
+ ORDER BY  M.MARCA, PC.CODPRACA

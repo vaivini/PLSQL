@@ -1,0 +1,20 @@
+select count(distinct mes) "Qtde Meses",
+       codigo,
+       descricao,
+       count(distinct dia) "Qtde Dias",
+       sum(rupturas) "Qtde Rupturas",
+       round(sum(rupturas) / count(distinct dia)) "Média diária"
+from (       
+select to_char(r.data,'MM/YYYY')mes,
+      r.data\:\:date dia,
+      count(r.id) rupturas,
+      p.codigo,
+      p.descricao 
+from ruptura r, produto p 
+where r.produto_id = p.id 
+and   r.data\:\:date >=to_timestamp(''||:período_inicial, 'DD/MM/YYYY')
+and   r.data\:\:date <=to_timestamp(''||:período_final, 'DD/MM/YYYY')
+group by  to_char(r.data,'MM/YYYY'), r.data\:\:date, p.codigo, p.descricao) a 
+group by codigo,
+       descricao
+order by 5 desc

@@ -1,0 +1,48 @@
+select m.numeroom
+     , m.ordem
+     , m.data_liberacao
+     , m.estornado
+     , (select min(data_aceitacao)
+          from convocacao_ativa 
+         where numeroom = m.numeroom) as aceitou_convocacao
+     , m.situacao
+		 , min(m.data_inicio_conferencia) as inicio_conf
+     , max(m.data_fim_conferencia) as fim_conf
+		 , (select id||'-'||nome from usuario where id = max(m.codigo_conferente)) as conferente
+     , min(m.data_inicio_separacao) as inicio_sep
+     , max(m.data_fim_separacao) as fim_sep
+     , (select id||'-'||nome from usuario where id = max(m.codigo_separador)) as separador
+     , (select s.descricao
+          from enderecos_setor_endereco ee
+              ,setor_endereco s
+         where ee.setor_id = s.id
+           and ee.endereco_id = max(m.endereco_id)) setor_om
+     , (select string_agg(distinct u.nome, ', ')
+          from enderecos_setor_endereco ee              
+              ,setor_endereco_usuario su
+              ,usuario u
+         where ee.endereco_id = max(m.endereco_id)
+           and ee.setor_id = su.setor_id
+           and su.usuario_id = u.id) as usuarios_desse_setor  
+     
+     , (select string_agg(distinct u.login||' Está Sep. O.M '||mm.numeroom, ' --- ')
+          from enderecos_setor_endereco ee              
+              ,setor_endereco_usuario su
+              ,usuario u
+              ,movimentacao mm
+         where ee.setor_id = su.setor_id
+           and su.usuario_id = u.id
+           and ee.endereco_id = mm.endereco_id
+           and mm.situacao = 'P'
+           and mm.estornado = 'N'
+           and mm.codigo_separador = u.id
+           and mm.data_inicio_separacao is not null
+           and mm.data_fim_separacao is null) as usuarios_desse_setor       
+  from movimentacao m
+ where m.numeroom = :numeroom 
+ group 
+    by m.numeroom
+     , m.ordem
+     , m.data_liberacao
+     , m.estornado
+     , m.situacao

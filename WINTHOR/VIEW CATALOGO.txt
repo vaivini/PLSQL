@@ -1,0 +1,6 @@
+CREATE OR REPLACE VIEW BIG_CATALOGO8022 AS
+SELECT codprod, embalagem || '-' || unidade AS emba, fatorpreco,
+           ROW_NUMBER () OVER (PARTITION BY codprod ORDER BY embalagem)    AS linha
+      FROM pcembalagem
+     WHERE enviafv = 'S'
+     order by emba

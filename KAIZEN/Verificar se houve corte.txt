@@ -1,0 +1,17 @@
+select (select p.codigo || ' - ' || p.descricao from produto p where p.id = a.produto_id ) as produto
+	,(select m.qtorig from movimentacao m where m.id = a.movimentacao_id ) as qt_orig_ped
+	,(select m.qtseparada from movimentacao m where m.id = a.movimentacao_id ) as qt_separada
+	,(select m.qtconferida from movimentacao m where m.id = a.movimentacao_id ) as qt_conferida
+	,a.qt_ajustada 
+	,a.tipo 
+	,to_char(a.data_ajuste, 'DD/MM/YYYY HH24:MM:SS') as data_ajuste 
+	,a.numero_carga 
+	,a.numero_pedido 
+	,a.observacao  
+	,(select mo.id || ' - ' || mo.descricao from motivo_ocorrencia mo where mo.id = a.motivo_ocorrencia_id ) as motivo
+	,(select u.chapaerp || ' - ' || u.nome from usuario u where u.id = a.usuario_id) as usuario
+	,case when a.integrado = true then 'Sim'  ELSE 'Não' end replicado_erp
+from ajuste_movimentacao a 
+where a.numero_pedido = :numero_pedido
+order by a.data_ajuste desc,
+a.produto_id

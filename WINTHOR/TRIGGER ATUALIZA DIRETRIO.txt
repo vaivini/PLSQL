@@ -1,0 +1,9 @@
+CREATE OR REPLACE TRIGGER trg_alt_diret_big
+  BEFORE INSERT OR UPDATE ON pcprodut
+  REFERENCING OLD AS OLD NEW AS NEW
+  FOR EACH ROW
+  begin
+ if nvl(:new.dirfotoprod, 'X') = 'X' then
+  :new.dirfotoprod := (('\\10.1.1.99\winthor\imagensprod\') || :new.codprod || '.jpg');
+ end if;
+end trg_alt_diret_big;

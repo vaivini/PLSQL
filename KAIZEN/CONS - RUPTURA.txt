@@ -1,0 +1,14 @@
+select mes "Mês", 
+      count(distinct dia) "Qtde Dias", 
+      sum(rupturas) "Qtde Rupturas",
+      floor(sum(rupturas) / count(distinct dia)) "Média diária"
+from (      
+select to_char(r.data,'MM/YYYY')mes,
+      r.data::date dia,
+      count(r.id) rupturas
+from ruptura r, produto p 
+where r.produto_id = p.id 
+and   r.data::date >='01-01-2021'
+group by  to_char(r.data,'MM/YYYY'), r.data::date) a 
+group by mes 
+order by 1

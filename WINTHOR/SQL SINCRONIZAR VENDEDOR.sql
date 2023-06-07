@@ -1,0 +1,1 @@
+select codusuario, dtinicioconexao, dtterminoconexao, diskspace, marca_aparelho, modelo_aparelho from mxsaparelhosconnlog where codusuario = 511 and dtterminoconexao between '01-11-2020' and '17-11-2020'

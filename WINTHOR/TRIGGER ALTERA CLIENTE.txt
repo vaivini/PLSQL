@@ -1,0 +1,10 @@
+CREATE OR REPLACE TRIGGER trg_alt_cliente_big
+  BEFORE UPDATE ON pcclient
+  REFERENCING OLD AS OLD NEW AS NEW
+  FOR EACH ROW
+  begin
+ if to_date(:new.DTULTCOMP, 'dd/mm/yy') < sysdate - 152 then
+  :new.codusur1 := 60;
+ end if;
+
+end trg_alt_cliente_big;

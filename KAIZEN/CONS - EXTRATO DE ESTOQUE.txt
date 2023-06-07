@@ -1,0 +1,22 @@
+select --distinct on (p.codigo)
+       p.codigo,
+       p.id,
+       p.descricao,
+       p.qtde_reservada,
+       p.qtde_avaria_gerencial,
+       p.qtde_gerencial "WinThor",
+       sum(s.qt - s.qt_pendente_saida) as "WMS",
+       s.qt_bloqueada,
+       sum(s.qt_pendente_entrada) as "Pendente_Entrada",
+       sum(s.qt_pendente_saida) as "Pendente_Saida"
+from produto p, estoque s
+where p.id = s.produto_id
+group by p.codigo,
+	   p.id,
+       p.descricao,
+       p.qtde_gerencial,
+       p.qtde_reservada,
+       p.qtde_avaria_gerencial,
+       s.qt_bloqueada
+			 
+order by p.codigo

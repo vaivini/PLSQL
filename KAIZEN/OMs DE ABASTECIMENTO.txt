@@ -1,0 +1,22 @@
+select m.numeroom
+     , max(m.data_finalizacao) as data_finalizacao
+     , m.estornado
+     , m.situacao
+		 , min(m.data_inicio_conferencia) as inicio_conferencia
+     , max(m.data_fim_conferencia) as fim_conferencia
+		 , (select id||'-'||nome from usuario where id = max(m.codigo_conferente)) as conferente
+     , min(m.data_inicio_separacao) as inicio_seperacao
+     , max(m.data_fim_separacao) as fim_seperacao
+     , (select id||'-'||nome from usuario where id = max(m.codigo_separador)) as separador
+           
+  from movimentacao m
+ where ((m.numeroom = :numeroom) OR (-1 = :numeroom))
+ and m.tipo in (61,62) 
+ and m.situacao = 'C'
+ AND M.data_inicio_conferencia >= to_timestamp( '' || :periodo_inicial, 'DD/MM/YYYY' ) 
+ AND M.data_fim_conferencia <= to_timestamp( '' || :periodo_final, 'DD/MM/YYYY' )
+ group 
+    by m.numeroom
+     , m.data_liberacao
+     , m.estornado
+     , m.situacao

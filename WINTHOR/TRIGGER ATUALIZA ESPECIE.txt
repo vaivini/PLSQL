@@ -1,0 +1,8 @@
+create or replace trigger ATUALIZA_ESPECIE
+  before INSERT
+  on PCNFSAIDPREFAT
+  for each row
+declare
+begin
+ SELECT 'NF' INTO :NEW.ESPECIE FROM DUAL ;
+end ATUALIZA_ESPECIE;

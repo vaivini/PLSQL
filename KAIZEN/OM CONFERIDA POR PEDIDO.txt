@@ -1,0 +1,31 @@
+SELECT DISTINCT
+	( M.numeroom ) AS "OM",
+	M.numero_pedido,
+	M.numero_carga,
+	M.volume_id,
+	M.tipo,
+	MIN ( M.data_inicio_conferencia ) AS "Data Inicio Conferencia",
+	MAX ( M.data_fim_conferencia ) AS "Data Fim Conferencia",
+	M.codigo_conferente,
+	u2.nome AS "Nome Conferente"	
+FROM
+	movimentacao M,
+	usuario u2 
+WHERE
+	M.codigo_conferente = u2.ID 
+	AND M.situacao = 'C' 
+	AND M.numero_pedido = :numped
+	AND tipo IN ( '13', '14', '17', '18', '20' ) 
+	AND M.data_fim_conferencia IS NOT NULL 
+	AND M.data_finalizacao IS NOT NULL
+and volume_id is not null	--order by data_fim_conferencia desc
+	group by 
+		( M.numeroom ),
+	M.numero_pedido,
+	M.numero_carga,
+	M.volume_id,
+	M.tipo,
+	--MIN ( M.data_inicio_conferencia ) ,
+--	MAX ( M.data_fim_conferencia ),
+	M.codigo_conferente,
+	u2.nome 

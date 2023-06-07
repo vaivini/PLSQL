@@ -1,0 +1,49 @@
+SELECT PCPRODUT.CODPROD,                                                                                                                                           
+        PCPRODUT.DESCRICAO,                                                                                                                                         
+                                                                                                                                             
+        PCEST.QTEST AS ESTOQUE_CONTABIL,                                                                                                                                  
+        PCEST.QTESTGER as ESTOQUE_GERENCIAL,                                                                                                                                             
+        PCEST.QTRESERV as ESTOQUE_RESERVADO,                                                                                                                                             
+                                                                                                                                        
+ 
+                                                                                                                                                  
+        (PKG_ESTOQUE.ESTOQUE_DISPONIVEL(PCEST.CODPROD, PCEST.CODFILIAL, 'V')) QTDISP,                                                                           
+                                                                                                                         
+                                                                                                                       
+        NVL(PCEST.QTINDENIZ, 0)  ESTOQUE_AVARIADO,                                                                                                                          
+                                                                                                                          
+        NVL(PCEST.CUSTOULTENT, 0) CUSTOULTENT,                                                                                                                      
+                                                                                                                    
+                                                                                                                          
+                                                                                                                       
+                                                                                                                         
+                                                                                                                                 
+                                                                                                                     
+        NVL(PCEST.QTBLOQUEADA, 0) - NVL(PCEST.QTINDENIZ, 0)  ESTOQUE_BLOQUEADO,                                                                                            
+                     
+      PCMARCA.CODMARCA                                                                                                                                             
+     , PCMARCA.MARCA                                                                                                                                                
+                                                                                                               
+  FROM PCPRODUT                                                                                                                                                     
+     , PCEST                                                                                                                                                        
+     , PCFORNEC                                                                                                                                                     
+     , PCCONSUM                                                                                                                                                     
+     , PCEMPR                                                                                                                                                       
+     , PCDEPTO                                                                                                                                                      
+     , PCFILIAL                                                                                                                                                     
+     , PCPRODFILIAL                                                                                                                                                 
+     , PCMARCA                                                                                                                                                      
+  WHERE PCEST.CODPROD = PCPRODUT.CODPROD(+)                                                                                                                         
+  AND PCPRODUT.CODPROD = PCPRODFILIAL.CODPROD(+)                                                                                                                    
+  AND PCPRODUT.CODMARCA = PCMARCA.CODMARCA(+)                                                                                                                       
+  AND PCEST.CODFILIAL = PCPRODFILIAL.CODFILIAL                                                                                                                      
+  AND PCPRODUT.CODFORNEC = PCFORNEC.CODFORNEC                                                                                                                       
+  AND PCEST.CODFILIAL = PCFILIAL.CODIGO                                                                                                                             
+  AND DECODE(NVL(PCPRODFILIAL.CODCOMPRADOR,PCFORNEC.CODCOMPRADOR),0,PCFORNEC.CODCOMPRADOR,NVL(PCPRODFILIAL.CODCOMPRADOR,PCFORNEC.CODCOMPRADOR)) = PCEMPR.MATRICULA  
+  AND PCDEPTO.CODEPTO(+)   = PCPRODUT.CODEPTO                                                                                                                       
+   AND ((PCPRODUT.CODFILIAL = PCEST.CODFILIAL ) OR (PCPRODUT.CODFILIAL = '99') OR (PCPRODUT.CODFILIAL IS NULL))
+   AND PCEST.CODFILIAL IN('1')
+   AND NVL(PCEST.QTESTGER,0)    > 0 
+     AND ((PCPRODUT.OBS2 NOT IN ('FL')) OR (PCPRODUT.OBS2 IS NULL))
+   -- AND QTINDENIZ > 0
+ORDER BY PCPRODUT.CODPROD 

@@ -1,0 +1,13 @@
+select rowid,
+       codprod,
+       CUSTOCONT,
+       CUSTOFIN,
+       CUSTOCONTANT,
+       CUSTOREALANT,
+       CUSTOFINANT,
+       PCMOV.CUSTOREALSEMST,
+       PCMOV.CUSTOREALSEMSTANT,
+       PCMOV.CUSTOFINEST
+  from pcmov
+ where numnota = 134925
+   and codprod in (17751, 17690, 17846)
